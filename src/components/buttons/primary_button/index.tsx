@@ -1,26 +1,20 @@
 import React from 'react';
-import Link from 'next/link';
 
 interface PrimaryButtonProps {
-    to?: string;
     onClick?: () => void;
     children: React.ReactNode;
     className?: string;
+    icon?: React.ReactNode; // Adicionado para permitir ícones
+    isActive?: boolean; // Adicionado para indicar estado ativo, se necessário
 }
 
-const PrimaryButton: React.FC<PrimaryButtonProps> = ({ to, onClick, children, className }) => {
-    const baseClass = 'primary-button w-full py-2 px-4 bg-orange-button hover:cursor-pointer text-white font-semibold rounded-[25px] shadow-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ' + (className || '');
-
-    if (to) {
-        return (
-            <Link href={to} className={baseClass}>
-                {children}
-            </Link>
-        );
-    }
-
+const PrimaryButton: React.FC<PrimaryButtonProps> = ({ onClick, children, className, icon }) => {
     return (
-        <button onClick={onClick} className={baseClass}>
+        <button
+            onClick={onClick}
+            className={`menu-button w-[250px] bg-orange-button flex flex-row-reverse p-[10px] rounded rounded-[25px] gap-[15px] items-center justify-between text-white text-[14px] hover:cursor-pointer ${className}`}
+        >
+            {icon}
             {children}
         </button>
     );
