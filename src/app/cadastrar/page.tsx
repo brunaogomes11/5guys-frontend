@@ -2,6 +2,7 @@
 
 import React from 'react';
 import PrimaryButton from '@/components/buttons/primary_button';
+import Logo from '@/components/logo';
 
 const CadastroUsuarioLayout: React.FC = () => {
     const handleSubmit = (event: React.FormEvent) => {
@@ -13,12 +14,10 @@ const CadastroUsuarioLayout: React.FC = () => {
     return (
         <div className="flex items-center justify-center min-h-screen bg-blue-primary">
             <div className="w-full max-w-md p-8 rounded-lg">
-                <h1 className="text-2xl font-bold text-center mb-6 text-blue-primary">
-                    Cadastro de Usuário
-                </h1>
+                <Logo fontSize='40px'/>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label htmlFor="nome" className="block text-sm font-medium text-white">
+                    <div className='mt-[30px]'>
+                        <label htmlFor="nome" className="block text-[14px] font-medium text-white">
                             Nome Completo
                         </label>
                         <input
@@ -29,8 +28,8 @@ const CadastroUsuarioLayout: React.FC = () => {
                             className="mt-1 block w-full px-3 py-2 bg-white-input rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-white">
+                    <div className='mt-[30px]'>
+                        <label htmlFor="email" className="block text-[14px] font-medium text-white">
                             Email
                         </label>
                         <input
@@ -41,8 +40,8 @@ const CadastroUsuarioLayout: React.FC = () => {
                             className="mt-1 block w-full px-3 py-2 bg-white-input rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
-                    <div>
-                        <label htmlFor="cpf" className="block text-sm font-medium text-white">
+                    <div className='mt-[30px]'>
+                        <label htmlFor="cpf" className="block text-[14px] font-medium text-white">
                             CPF
                         </label>
                         <input
@@ -53,8 +52,8 @@ const CadastroUsuarioLayout: React.FC = () => {
                             className="mt-1 block w-full px-3 py-2 bg-white-input rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
-                    <div>
-                        <label htmlFor="senha" className="block text-sm font-medium text-white">
+                    <div className='mt-[30px]'>
+                        <label htmlFor="senha" className="block text-[14px] font-medium text-white">
                             Senha
                         </label>
                         <input
@@ -66,7 +65,7 @@ const CadastroUsuarioLayout: React.FC = () => {
                         />
                     </div>
                     <div className='mt-[30px]'>
-                        <label htmlFor="confirmarSenha" className="block text-sm font-medium text-white">
+                        <label htmlFor="confirmarSenha" className="block text-[14px] font-medium text-white">
                             Confirmar Senha
                         </label>
                         <input
@@ -77,7 +76,7 @@ const CadastroUsuarioLayout: React.FC = () => {
                             className="mt-1 block w-full px-3 py-2 bg-white-input rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         />
                     </div>
-                    <PrimaryButton>
+                    <PrimaryButton className='mt-[40px]'>
                         Cadastrar
                     </PrimaryButton>
                 </form>
