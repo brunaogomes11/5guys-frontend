@@ -1,88 +1,109 @@
 "use client";
 
-import React from 'react';
-import PrimaryButton from '@/components/buttons/primary_button';
 import Logo from '@/components/logo';
+import React, { useState } from 'react';
 
-const CadastroUsuarioLayout: React.FC = () => {
-    const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault();
-        // Lógica para envio do formulário
-        console.log('Formulário enviado');
+const CadastroPage: React.FC = () => {
+    const [formData, setFormData] = useState({
+        nome: '',
+        email: '',
+        cpf: '',
+        senha: '',
+        confirmarSenha: '',
+    });
+
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [showTooltip, setShowTooltip] = useState(false);
+
+    const validate = () => {
+        const newErrors: { [key: string]: string } = {};
+
+        if (!formData.nome.trim()) newErrors.nome = 'Nome é obrigatório.';
+        if (!formData.email.match(/^\S+@\S+\.\S+$/)) newErrors.email = 'Email inválido.';
+        if (!formData.cpf.match(/^\d{11}$/)) newErrors.cpf = 'CPF deve conter 11 dígitos numéricos.';
+        if (!validarSenha(formData.senha)) newErrors.senha = 'A senha deve conter pelo menos 6 caracteres, uma letra maiúscula, um símbolo e um número.';
+        if (formData.senha !== formData.confirmarSenha) newErrors.confirmarSenha = 'As senhas não coincidem.';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    function validarSenha(senha: string) {
+        // Pelo menos 6 caracteres, uma letra maiúscula, um símbolo e um número
+        return senha.length >= 6 &&
+            /[A-Z]/.test(senha) &&
+            /[0-9]/.test(senha) &&
+            /[^A-Za-z0-9]/.test(senha);
+    }
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+        setErrors({ ...errors, [e.target.name]: '' });
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (validate()) {
+            console.log('Dados válidos:', formData);
+            // Aqui você pode enviar para o backend
+        }
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-blue-primary">
-            <div className="w-full max-w-md p-8 rounded-lg">
-                <Logo fontSize='40px'/>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className='mt-[30px]'>
-                        <label htmlFor="nome" className="block text-[14px] font-medium text-white">
-                            Nome Completo
-                        </label>
-                        <input
-                            type="text"
-                            id="nome"
-                            name="nome"
-                            required
-                            className="mt-1 block w-full px-3 py-2 bg-white-input rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    <div className='mt-[30px]'>
-                        <label htmlFor="email" className="block text-[14px] font-medium text-white">
-                            Email
-                        </label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            required
-                            className="mt-1 block w-full px-3 py-2 bg-white-input rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    <div className='mt-[30px]'>
-                        <label htmlFor="cpf" className="block text-[14px] font-medium text-white">
-                            CPF
-                        </label>
-                        <input
-                            type="text"
-                            id="cpf"
-                            name="cpf"
-                            required
-                            className="mt-1 block w-full px-3 py-2 bg-white-input rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    <div className='mt-[30px]'>
-                        <label htmlFor="senha" className="block text-[14px] font-medium text-white">
-                            Senha
-                        </label>
-                        <input
-                            type="password"
-                            id="senha"
-                            name="senha"
-                            required
-                            className="mt-1 block w-full px-3 py-2 bg-white-input rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    <div className='mt-[30px]'>
-                        <label htmlFor="confirmarSenha" className="block text-[14px] font-medium text-white">
-                            Confirmar Senha
-                        </label>
-                        <input
-                            type="password"
-                            id="confirmarSenha"
-                            name="confirmarSenha"
-                            required
-                            className="mt-1 block w-full px-3 py-2 bg-white-input rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-                    <PrimaryButton className='mt-[40px]'>
-                        Cadastrar
-                    </PrimaryButton>
-                </form>
-            </div>
+        <div className="bg-[#0e335e] min-h-screen flex flex-col items-center justify-center">
+            <Logo fontSize='40px' />
+            <form
+                onSubmit={handleSubmit}
+                className="flex flex-col w-full max-w-md bg-transparent"
+            >
+                {renderInput('Nome Completo', 'nome')}
+                {renderInput('Email', 'email')}
+                {renderInput('CPF', 'cpf')}
+                {renderInput('Senha', 'senha', 'password')}
+                {renderInput('Confirmar Senha', 'confirmarSenha', 'password')}
+
+                <button
+                    type="submit"
+                    className="bg-[#ff6530] text-white font-bold border-none rounded-[20px] py-3 px-4 text-base cursor-pointer mt-2 transition hover:bg-[#ff7b4a]"
+                >
+                    Cadastrar
+                </button>
+            </form>
         </div>
     );
+
+    function renderInput(label: string, name: string, type = 'text') {
+        // Adiciona o "?" com tooltip apenas no campo senha
+        return (
+            <div className="mb-4 relative">
+                <label className="text-white block mb-1">
+                    {label}
+                    {name === 'senha' && (
+                        <span
+                            className="inline-flex items-center justify-center ml-2 w-5 h-5 rounded-full border-[1px] text-white text-xs font-bold cursor-pointer relative"
+                            onMouseEnter={() => setShowTooltip(true)}
+                            onMouseLeave={() => setShowTooltip(false)}
+                        >
+                            ?
+                            {showTooltip && (
+                                <span className="absolute left-6 top-1/2 -translate-y-1/2 z-10 w-64 bg-gray-900 text-white text-xs rounded px-3 py-2 shadow-lg">
+                                    A senha deve conter pelo menos 6 caracteres, uma letra maiúscula, um símbolo e um número.
+                                </span>
+                            )}
+                        </span>
+                    )}
+                </label>
+                <input
+                    type={type}
+                    name={name}
+                    value={formData[name as keyof typeof formData]}
+                    onChange={handleChange}
+                    className="w-full p-2 bg-[#EAEAEA] rounded-[6px] border-none mt-1 text-base"
+                />
+                {errors[name] && <span className="text-[#ff6b6b] text-xs mt-1 block">{errors[name]}</span>}
+            </div>
+        );
+    }
 };
 
-export default CadastroUsuarioLayout;
+export default CadastroPage;
