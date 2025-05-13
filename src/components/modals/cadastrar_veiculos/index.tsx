@@ -8,7 +8,7 @@ interface ModalProps {
     onClose: () => void;
 }
 
-const ModalCadastrarAlojamento: React.FC<ModalProps> = ({ isOpen, onClose }) => {
+const ModalCadastrarVeiculos: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     const [form, setForm] = useState({
         nome: "",
         logradouro: "",
@@ -27,11 +27,11 @@ const ModalCadastrarAlojamento: React.FC<ModalProps> = ({ isOpen, onClose }) => 
     return (
         <div className="fixed top-0 left-0 w-screen h-screen bg-[#000000AA] flex items-center justify-center z-[1000]">
             <div className="bg-blue-primary py-[3.25rem] px-[5.5rem] rounded-lg min-w-[350px] shadow-lg relative">
-                <h2 className="text-[#FFFFFF] mb-4 text-center">Cadastrar Alojamento</h2>
+                <h2 className="text-[#FFFFFF] mb-4 text-center">Cadastrar Obra</h2>
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
-                        console.log("Dados do alojamento:", form);
+                        console.log("Dados do Obra:", form);
                         onClose(); // Fecha o modal após salvar
                     }}
                 >
@@ -119,4 +119,4 @@ const ModalCadastrarAlojamento: React.FC<ModalProps> = ({ isOpen, onClose }) => 
     );
 };
 
-export default ModalCadastrarAlojamento;
+export default ModalCadastrarVeiculos;

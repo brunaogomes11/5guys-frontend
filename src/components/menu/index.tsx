@@ -29,13 +29,13 @@ export default function Menu() {
                         <MenuButton
                             icon={<img src="/icons/map_icon.svg" alt="Map Icon" className="h-6 w-6" />}
                             isActive={pathname === '/transportes'} // Verifica o pathname
-                            nome="Transporte"
+                            nome="Transportes"
                             link="/transportes"
                         />
                         <MenuButton
                             icon={<img src="/icons/house_icon.svg" alt="House Icon" className="h-6 w-6" />}
                             isActive={pathname === '/alojamentos'} // Verifica o pathname
-                            nome="Alojamento"
+                            nome="Alojamentos"
                             link="/alojamentos"
                         />
                         <MenuButton
@@ -56,6 +56,26 @@ export default function Menu() {
                             nome="Veículos"
                             link="/veiculos"
                         />
+                    </div>
+                    <div className="relative">
+                        <Disclosure>
+                            {({ open }) => (
+                                <div>
+                                    <DisclosureButton className="flex items-center gap-2 rounded-full py-[0.5rem] px-[1rem] cursor-pointer bg-transparent border border-white text-white text-[1rem] font-normal focus:outline-none transition-all duration-200">
+                                        username
+                                        <img src="/icons/arrow_down_icon.svg" alt="Arrow Down" className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+                                    </DisclosureButton>
+                                    <DisclosurePanel className="absolute right-0 mt-2 w-full rounded-lg bg-white shadow-lg z-10">
+                                        <button
+                                            className="block w-full text-left px-4 py-3 text-blue-primary hover:bg-blue-100 rounded-lg text-[1rem] cursor-pointer"
+                                            onClick={() => {/* handle logout here */}}
+                                        >
+                                            Deslogar
+                                        </button>
+                                    </DisclosurePanel>
+                                </div>
+                            )}
+                        </Disclosure>
                     </div>
                 </div>
             </div>
