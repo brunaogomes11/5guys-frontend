@@ -10,6 +10,7 @@ module.exports = {
                 orangeButton: "var(--orange-button)",
                 whiteInput: "var(--white-input)",
                 redCancel: "var(--red-cancel)",
+                greenSuccess: "var(--green-success)",
             },
         },
     },

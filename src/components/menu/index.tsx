@@ -68,7 +68,10 @@ export default function Menu() {
                                     <DisclosurePanel className="absolute right-0 mt-2 w-full rounded-lg bg-white shadow-lg z-10">
                                         <button
                                             className="block w-full text-left px-4 py-3 text-blue-primary hover:bg-blue-100 rounded-lg text-[1rem] cursor-pointer"
-                                            onClick={() => {/* handle logout here */}}
+                                            onClick={() => {
+                                                require('@/contexts/AuthContext').useAuth().logout();
+                                                window.location.href = '/login';
+                                            }}
                                         >
                                             Deslogar
                                         </button>

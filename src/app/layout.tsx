@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+"use client";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,10 +14,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "5 Guys",
-  description: "Site criado para o projeto 5 Guys de projeto orientado",
-};
 
 export default function RootLayout({
   children,
@@ -29,9 +26,19 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          {children}
+          <AuthGate>{children}</AuthGate>
         </AuthProvider>
       </body>
     </html>
   );
+}
+
+function AuthGate({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const router = useRouter();
+  if (typeof window !== 'undefined' && !user && window.location.pathname !== '/login' && window.location.pathname !== '/cadastrar') {
+    window.location.href = '/login';
+    return null;
+  }
+  return <>{children}</>;
 }

@@ -7,6 +7,7 @@
   --orange-button: #FF6B35;
   --white-input: #EAEAEA;
   --red-cancel: #FF3535;
+  --green-success: #35FF46;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -48,6 +49,7 @@
   --color-orange-button: var(--orange-button); /* Adicionado */
   --color-white-input: var(--white-input); /* Adicionado */
   --color-red-cancel: var(--red-cancel); /* Adicionado */
+  --color-green-success: var(--green-success); /* Adicionado */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);

@@ -3,12 +3,12 @@ import Link from "next/link";
 import PrimaryButton from "@/components/buttons/primary_button";
 import SuccessButton from "@/components/buttons/success_button";
 
-interface ModalSucessoCadAlojamentoProps {
+interface ModalSucessoCadObrasProps {
     isOpen: boolean;
     onClose?: () => void;
 }
 
-const ModalSucessoCadAlojamento: React.FC<ModalSucessoCadAlojamentoProps> = ({ isOpen, onClose }) => {
+const ModalSucessoCadAlojamento: React.FC<ModalSucessoCadObrasProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-[#000000AA]">
@@ -19,13 +19,13 @@ const ModalSucessoCadAlojamento: React.FC<ModalSucessoCadAlojamentoProps> = ({ i
 
                 </div>
                 <div className="text-white text-2xl text-center mb-8 font-normal">
-                    O cadastro do alojamento foi<br />feito com sucesso
+                    O cadastro da obra foi<br />feito com sucesso
                 </div>
                 <SuccessButton className="mt-2 mx-auto relative"
                 onClick={onClose}
                 >
-                    <img src="icons/house_icon.svg" alt="Truck Icon" className="w-[1rem] absolute right-3 top-1/2 -translate-y-1/2" />
-                    Ir para Alojamentos
+                    <img src="icons/tool_icon.svg" alt="Tool Icon" className="w-[1rem] absolute right-3 top-1/2 -translate-y-1/2" />
+                    Ir para Obras
                 </SuccessButton>
                 {onClose && (
                     <button onClick={onClose} className="absolute top-3 right-3 text-white text-2xl font-bold hover:text-gray-300">×</button>

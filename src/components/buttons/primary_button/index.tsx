@@ -12,7 +12,7 @@ const PrimaryButton: React.FC<PrimaryButtonProps> = ({ onClick, children, classN
     return (
         <button
             onClick={onClick}
-            className={`menu-button w-[250px] bg-orange-button flex flex-row-reverse p-[10px] rounded rounded-[25px] gap-[15px] items-center text-white text-[14px] hover:cursor-pointer ${icon ? 'justify-between' : 'justify-center'} ${className}`}
+            className={`menu-button w-[20vw] bg-orange-button flex flex-row-reverse p-[10px] rounded rounded-[25px] gap-[15px] items-center text-white text-[14px] hover:cursor-pointer ${icon ? 'justify-between' : 'justify-center'} ${className}`}
         >
             {icon}
             {children}

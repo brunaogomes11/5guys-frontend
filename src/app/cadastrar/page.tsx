@@ -15,6 +15,9 @@ const CadastroPage: React.FC = () => {
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [showTooltip, setShowTooltip] = useState(false);
 
+    const { login } = require('@/contexts/AuthContext').useAuth();
+    const router = require('next/navigation').useRouter();
+
     const validate = () => {
         const newErrors: { [key: string]: string } = {};
 
@@ -41,11 +44,34 @@ const CadastroPage: React.FC = () => {
         setErrors({ ...errors, [e.target.name]: '' });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (validate()) {
-            console.log('Dados válidos:', formData);
-            // Aqui você pode enviar para o backend
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/usuarios/cadastrar/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nome: formData.nome,
+                        email: formData.email,
+                        cpf: formData.cpf,
+                        senha: formData.senha,
+                        confirmacao_senha: formData.confirmarSenha
+                    })
+                });
+                if (res.ok) {
+                    // Autentica automaticamente após cadastro
+                    const ok = await login(formData.email, formData.senha);
+                    if (ok) {
+                        router.push('/');
+                    }
+                } else {
+                    const data = await res.json();
+                    setErrors({ email: data.detail || 'Erro ao cadastrar.' });
+                }
+            } catch (err) {
+                setErrors({ email: 'Erro de conexão com o servidor.' });
+            }
         }
     };
 
