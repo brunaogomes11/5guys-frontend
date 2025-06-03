@@ -1,3 +1,5 @@
+'use cliente'
+
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
 

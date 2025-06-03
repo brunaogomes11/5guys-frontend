@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,6 +21,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  useEffect(() => {
+    // Remove atributos indesejados adicionados por extensões do navegador
+    const body = document.querySelector('body');
+    if (body) {
+      body.removeAttribute('cz-shortcut-listen');
+    }
+  }, []);
+
   return (
     <html lang="pt-br">
       <body
