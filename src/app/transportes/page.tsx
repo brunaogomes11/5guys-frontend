@@ -6,6 +6,7 @@ import TransporteTable from '@/components/tables/transporte/transporte';
 import PrimaryButton from '@/components/buttons/primary_button';
 import ModalCadastrarTransporte from '@/components/modals/cadastrar_transporte';
 import ModalMapaTransporte from '@/components/maps/modal_mapa_transporte';
+import VisualizarTransporteModal from '@/components/modals/VisualizarTransporteModal'; // ✅ novo import
 
 type Rota = {
   id: string;
@@ -19,6 +20,7 @@ const TransportePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'emAndamento' | 'concluidos' | 'emEspera'>('emAndamento');
   const [isCadastroModalOpen, setCadastroModalOpen] = useState(false);
   const [isMapaModalOpen, setMapaModalOpen] = useState(false);
+  const [rotaSelecionada, setRotaSelecionada] = useState<Rota | null>(null); // ✅ estado para visualizar
   const [rotas, setRotas] = useState<Rota[]>([]);
 
   useEffect(() => {
@@ -71,9 +73,19 @@ const TransportePage: React.FC = () => {
           </PrimaryButton>
         </div>
 
-        {/* ✅ Agora passando as rotas filtradas corretamente */}
-        <TransporteTable status={activeTab} rotas={rotasFiltradas} />
+        {/* ✅ Passa função de visualização para o componente */}
+        <TransporteTable
+          status={activeTab}
+          rotas={rotasFiltradas}
+          onVisualizar={(rota) => setRotaSelecionada(rota)}
+        />
       </div>
+
+      {/* ✅ Modal de visualização */}
+      <VisualizarTransporteModal
+        rota={rotaSelecionada}
+        onClose={() => setRotaSelecionada(null)}
+      />
 
       <ModalCadastrarTransporte
         isOpen={isCadastroModalOpen}

@@ -11,6 +11,7 @@ type Rota = {
 type Props = {
   status: 'emAndamento' | 'concluidos' | 'emEspera';
   rotas: Rota[];
+  onVisualizar: (rota: Rota) => void; // ✅ nova prop
 };
 
 const statusLabel = {
@@ -19,7 +20,7 @@ const statusLabel = {
   emEspera: "Em Espera",
 };
 
-const TransporteTable = ({ status, rotas }: Props) => {
+const TransporteTable = ({ status, rotas, onVisualizar }: Props) => {
   return (
     <div className="w-full mt-6">
       <h2 className="text-lg font-semibold mb-4">{statusLabel[status]}</h2>
@@ -40,10 +41,16 @@ const TransporteTable = ({ status, rotas }: Props) => {
           </thead>
           <tbody>
             {rotas.map((rota) => (
-              <tr key={rota.id} className="border-t hover:bg-gray-50">
+              <tr
+                key={rota.id}
+                className="border-t hover:bg-gray-50 cursor-pointer transition"
+                onClick={() => onVisualizar(rota)} // ✅ ao clicar, chama o modal
+              >
                 <td className="p-3">{rota.origem}</td>
                 <td className="p-3">{rota.destino}</td>
-                <td className="p-3">{statusLabel[rota.status as keyof typeof statusLabel] ?? rota.status}</td>
+                <td className="p-3">
+                  {statusLabel[rota.status as keyof typeof statusLabel] ?? rota.status}
+                </td>
                 <td className="p-3">{rota.data}</td>
               </tr>
             ))}
