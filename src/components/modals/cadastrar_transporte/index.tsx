@@ -20,6 +20,7 @@ const ModalCadastrarTransporte: React.FC<ModalProps> = ({
   });
 
   const [mensagemSucesso, setMensagemSucesso] = useState("");
+  const [mensagemErro, setMensagemErro] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -28,29 +29,40 @@ const ModalCadastrarTransporte: React.FC<ModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // ✅ Validação dos campos obrigatórios (SCRUM-47)
+    if (!form.descricao || !form.destino || !form.motorista) {
+      setMensagemErro("Preencha todos os campos obrigatórios.");
+      setMensagemSucesso("");
+      return;
+    }
+
     try {
-      // Simulando envio
       const res = await fetch("/api/ordens_transporte", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          descricao: form.descricao,
-          destino: form.destino,
-          motorista: form.motorista,
-        }),
+        body: JSON.stringify(form),
       });
 
-      if (!res.ok) throw new Error();
+      // ✅ Tratamento de erros de conflito ou outros (SCRUM-53)
+      if (!res.ok) {
+        if (res.status === 409) {
+          setMensagemErro("Já existe uma ordem de transporte com esses dados.");
+        } else {
+          setMensagemErro("Erro ao cadastrar transporte. Tente novamente.");
+        }
+        setMensagemSucesso("");
+        return;
+      }
 
+      // ✅ Cadastro com sucesso
       setMensagemSucesso("Transporte cadastrado com sucesso! ✅");
-
-      // Limpa o formulário
+      setMensagemErro("");
       setForm({ descricao: "", destino: "", motorista: "" });
-
-      // Chama a função de sucesso do pai
       onSuccess();
     } catch (error) {
       console.error("Erro ao cadastrar transporte:", error);
+      setMensagemErro("Erro inesperado ao cadastrar transporte.");
+      setMensagemSucesso("");
     }
   };
 
@@ -61,7 +73,14 @@ const ModalCadastrarTransporte: React.FC<ModalProps> = ({
       <div className="bg-white p-6 rounded-lg w-96">
         <h2 className="text-lg font-bold mb-4">Cadastrar Transporte</h2>
 
-        {/* ✅ Mensagem de sucesso */}
+        {/* ✅ Mensagem de erro (SCRUM-47 e SCRUM-53) */}
+        {mensagemErro && (
+          <div className="bg-red-500 text-white text-sm px-3 py-2 rounded mb-4">
+            {mensagemErro}
+          </div>
+        )}
+
+        {/* ✅ Mensagem de sucesso (SCRUM-52) */}
         {mensagemSucesso && (
           <div className="bg-green-500 text-white text-sm px-3 py-2 rounded mb-4">
             {mensagemSucesso}
