@@ -21,7 +21,7 @@ export function TabelaVeiculos() {
         { key: 'placa', label: 'Placa', className: 'w-[150px] text-white' },
         { key: 'modelo', label: 'Modelo', className: 'w-[200px] text-white' },
         { key: 'cor', label: 'Cor', className: 'w-[200px] text-white' },
-        { key: 'quantidade_passaageiros', label: 'Quantidade Passageiros', className: 'w-[200px] text-white' },
+        { key: 'quantidade_passageiros', label: 'Quantidade Passageiros', className: 'w-[200px] text-white' },
         { key: 'actions', label: 'Ações', className: 'w-[100px] text-white text-center' },
     ];
 
