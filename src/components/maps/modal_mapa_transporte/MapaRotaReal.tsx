@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -159,6 +159,9 @@ const MapaRotaReal: React.FC<MapaRotaRealProps> = ({
         }
         return 'pontos-manuais';
     }, [rota?.trechos, rota?.polyline]);
+
+    // Memoriza o array de pontos para evitar mudanças desnecessárias
+    const pontosMemoizados = useMemo(() => pontos, [JSON.stringify(pontos)]);
 
     useEffect(() => {
         if (rotaKey === rotaProcessada) {
@@ -323,16 +326,16 @@ const MapaRotaReal: React.FC<MapaRotaRealProps> = ({
 
             } catch (error) {
                 console.error("Erro ao decodificar polyline:", error);
-                setPontosVisiveis(pontos);
+                setPontosVisiveis(pontosMemoizados);
                 setPontosDecodificados([]);
                 setRotaProcessada(rotaKey);
             }
         } else if (!rota?.polyline && !rota?.trechos) {
-            setPontosVisiveis(pontos);
+            setPontosVisiveis(pontosMemoizados);
             setPontosDecodificados([]);
             setRotaProcessada(rotaKey);
         }
-    }, [rotaKey, rotaProcessada, rota, pontos]);
+    }, [rotaKey, rotaProcessada, rota, pontosMemoizados]);
 
     useEffect(() => {
         if (pontosVisiveis.length > 0) {
