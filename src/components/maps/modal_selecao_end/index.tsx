@@ -85,7 +85,7 @@ const ModalSelecaoEnd: React.FC<ModalSelecaoEndProps> = ({ isOpen, onClose, onSe
   if (!isOpen) return null;
 
   return (
-    <div className="fixed top-0 left-0 w-screen h-screen bg-[#000000AA] flex items-center justify-center z-[1100]">
+    <div className="fixed top-0 left-0 w-screen h-screen bg-[#000000AA] flex items-center justify-center z-[9999]">
       <div className="bg-white rounded-lg shadow-lg p-6 min-w-[50vw] min-h-[400px] relative flex flex-col">
         <h2 className="text-blue-primary mb-2 text-center">Selecione no mapa</h2>
         <p className="text-xs text-gray-600 mb-3 text-center">

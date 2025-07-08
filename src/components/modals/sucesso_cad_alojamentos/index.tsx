@@ -11,7 +11,7 @@ interface ModalSucessoCadAlojamentoProps {
 const ModalSucessoCadAlojamento: React.FC<ModalSucessoCadAlojamentoProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
     return (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-[#000000AA]">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#000000AA]">
             <div className="bg-blue-primary rounded-2xl p-10 flex flex-col items-center w-[400px] max-w-[90vw] shadow-2xl relative">
                 {/* Ícone de sucesso (banco de dados com check) */}
                 <div className="mb-6">
