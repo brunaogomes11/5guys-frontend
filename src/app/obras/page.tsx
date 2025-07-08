@@ -4,16 +4,29 @@ import Menu from "@/components/menu";
 import { useState } from "react";
 import ModalCadastrarObra from "@/components/modals/cadastrar_obras";
 import { TabelaObras } from "@/components/tables/obras";
+import MapaObras from "@/components/maps/mapa_obras/MapaObras";
 
 export default function ObrasPage() {
     const [showModal, setShowModal] = useState(false);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+    const handleSuccess = () => {
+        setShowModal(false);
+        setRefreshTrigger(prev => prev + 1);
+    };
+
     return (
         <div>
             <Menu />
-            <div className="w-[100%] h-[100%] p-[32px] border-box flex flex-row gap-[32px] justify-start items-start">
-                <div className="w-[300px] flex justify-center items-center">
+            <div className="w-[100%] h-[100%] p-[32px] border-box flex flex-col gap-[24px]">
+                {/* Seção de cadastro */}
+                <div className="flex justify-center">
                     {showModal && (
-                        <ModalCadastrarObra isOpen={true} onClose={() => setShowModal(false)} />
+                        <ModalCadastrarObra 
+                            isOpen={true} 
+                            onClose={() => setShowModal(false)}
+                            onSuccess={handleSuccess}
+                        />
                     )}
 
                     <PrimaryButton onClick={() => setShowModal(true)}>
@@ -21,8 +34,22 @@ export default function ObrasPage() {
                         Cadastrar novas obras
                     </PrimaryButton>
                 </div>
-                <div className="w-full">
-                    <TabelaObras />
+
+                {/* Seção principal com tabela e mapa */}
+                <div className="flex flex-col lg:flex-row gap-[24px] h-[calc(100vh-200px)]">
+                    {/* Tabela de obras */}
+                    <div className="w-full lg:w-[50%] h-full overflow-auto">
+                        <h2 className="text-xl font-semibold mb-4 text-gray-800">Lista de Obras</h2>
+                        <TabelaObras refreshTrigger={refreshTrigger} />
+                    </div>
+
+                    {/* Mapa de obras */}
+                    <div className="w-full lg:w-[50%] h-full">
+                        <h2 className="text-xl font-semibold mb-4 text-gray-800">Localização das Obras</h2>
+                        <div className="h-[calc(100%-40px)] border border-gray-200 rounded-lg overflow-hidden">
+                            <MapaObras refreshTrigger={refreshTrigger} />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

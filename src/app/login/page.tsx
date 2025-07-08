@@ -17,7 +17,7 @@ const LoginPage: React.FC = () => {
         event.preventDefault();
         const ok = await login(email, senha);
         if (ok) {
-            router.push('/'); // Redireciona para a home
+            // Não redireciona aqui - deixa o AuthGate do layout cuidar disso
         } else {
             setError('E-mail ou senha inválidos');
         }
@@ -57,7 +57,7 @@ const LoginPage: React.FC = () => {
                         />
                     </div>
                     {error && <div className="text-red-500 text-sm">{error}</div>}
-                    <PrimaryButton className='mt-[40px]'>
+                    <PrimaryButton type="submit" className='mt-[40px]'>
                         Entrar
                     </PrimaryButton>
                     <div className="flex justify-center mt-4">

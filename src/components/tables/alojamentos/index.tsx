@@ -7,14 +7,24 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import DeleteButton from "@/components/buttons/delete_button";
+import ModalConfirmacaoExclusao from "@/components/modals/confirmacao_exclusao";
 
-export function TabelaAlojamentos() {
+
+interface TabelaAlojamentosProps {
+    refreshTrigger?: number; // Prop para trigger de refresh
+}
+
+export function TabelaAlojamentos({ refreshTrigger }: TabelaAlojamentosProps) {
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
     const [filter, setFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const itemsPerPage = 10;
 
     const columns = [
@@ -29,7 +39,7 @@ export function TabelaAlojamentos() {
         async function fetchData() {
             setLoading(true);
             try {
-                const res = await fetch('http://127.0.0.1:8000/api/alojamentos/', {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}api/alojamentos/`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 });
                 if (res.ok) {
@@ -45,7 +55,40 @@ export function TabelaAlojamentos() {
             setLoading(false);
         }
         fetchData();
-    }, []);
+    }, [refreshTrigger]); // Adiciona refreshTrigger como dependência
+
+    // Função para excluir alojamento
+    const handleDelete = async () => {
+        if (!selectedItem) return;
+        
+        setIsDeleting(true);
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}api/alojamentos/${selectedItem.id}/`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            });
+            
+            if (res.ok) {
+                // Remove o item da lista local
+                setData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+                // Fecha o modal
+                setShowDeleteModal(false);
+                setSelectedItem(null);
+            } else {
+                alert('Erro ao excluir alojamento');
+            }
+        } catch (error) {
+            console.error('Erro ao excluir:', error);
+            alert('Erro ao excluir alojamento');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const openDeleteModal = (item: any) => {
+        setSelectedItem(item);
+        setShowDeleteModal(true);
+    };
 
     function sortData(data: any[]) {
         if (!sortConfig) return data;
@@ -122,7 +165,9 @@ export function TabelaAlojamentos() {
                             <TableCell>{invoice.endereco}</TableCell>
                             <TableCell>{invoice.cidade}</TableCell>
                             <TableCell className="text-center">{invoice.qntdFuncionarios}</TableCell>
-                            <TableCell className="text-center">{/* ações */}</TableCell>
+                            <TableCell className="text-center">
+                                <DeleteButton onClick={() => openDeleteModal(invoice)} />
+                            </TableCell>
                         </TableRow>
                     ))}
                     {paginatedInvoices.length === 0 && (
@@ -152,6 +197,20 @@ export function TabelaAlojamentos() {
                     Próxima
                 </button>
             </div>
+            
+            {/* Modal de confirmação de exclusão */}
+            <ModalConfirmacaoExclusao
+                isOpen={showDeleteModal}
+                onClose={() => {
+                    setShowDeleteModal(false);
+                    setSelectedItem(null);
+                }}
+                onConfirm={handleDelete}
+                titulo="Excluir Alojamento"
+                mensagem="Tem certeza que deseja excluir o alojamento"
+                nomeItem={selectedItem?.nome || ""}
+                isDeleting={isDeleting}
+            />
         </div>
     );
 }
@@ -178,7 +237,7 @@ export function TabelaFuncionarios() {
         async function fetchData() {
             setLoading(true);
             try {
-                const res = await fetch('http://127.0.0.1:8000/api/funcionarios/', {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}api/funcionarios/`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 });
                 if (res.ok) {
@@ -329,7 +388,7 @@ export function TabelaObras() {
         async function fetchData() {
             setLoading(true);
             try {
-                const res = await fetch('http://127.0.0.1:8000/api/obras/', {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}api/obras/`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 });
                 if (res.ok) {
@@ -480,7 +539,7 @@ export function TabelaVeiculos() {
         async function fetchData() {
             setLoading(true);
             try {
-                const res = await fetch('http://127.0.0.1:8000/api/veiculos/', {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}api/veiculos/`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 });
                 if (res.ok) {

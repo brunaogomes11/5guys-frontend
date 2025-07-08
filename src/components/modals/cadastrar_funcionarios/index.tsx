@@ -8,26 +8,35 @@ import ModalSelecaoEnd from "@/components/maps/modal_selecao_end";
 interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSuccess?: () => void;
 }
 
-const ModalCadastrarFuncionarios: React.FC<ModalProps> = ({ isOpen, onClose }) => {
+const ModalCadastrarFuncionarios: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess }) => {
     const [form, setForm] = useState({
         nome_completo: "",
         cpf: "",
         alojamento: "",
+        obra: "",
     });
     const [showSuccess, setShowSuccess] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
     const [showMap, setShowMap] = useState(false);
     const [alojamentos, setAlojamentos] = useState<any[]>([]);
+    const [obras, setObras] = useState<any[]>([]);
     const [loadingAlojamentos, setLoadingAlojamentos] = useState(true);
+    const [loadingObras, setLoadingObras] = useState(true);
     const [selectedAlojamento, setSelectedAlojamento] = useState<string>("");
+    const [selectedObra, setSelectedObra] = useState<string>("");
 
-    // Busca alojamentos ao abrir o modal
+    
+    // Busca alojamentos e obras ao abrir o modal
     React.useEffect(() => {
         if (isOpen) {
             setLoadingAlojamentos(true);
-            fetch('http://127.0.0.1:8000/api/alojamentos/', {
+            setLoadingObras(true);
+            
+            // Busca alojamentos
+            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}api/alojamentos/`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             })
                 .then(res => res.json())
@@ -36,6 +45,17 @@ const ModalCadastrarFuncionarios: React.FC<ModalProps> = ({ isOpen, onClose }) =
                     setLoadingAlojamentos(false);
                 })
                 .catch(() => setLoadingAlojamentos(false));
+
+            // Busca obras
+            fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}api/obras/`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            })
+                .then(res => res.json())
+                .then(data => {
+                    setObras(data);
+                    setLoadingObras(false);
+                })
+                .catch(() => setLoadingObras(false));
         }
     }, [isOpen]);
 
@@ -47,14 +67,17 @@ const ModalCadastrarFuncionarios: React.FC<ModalProps> = ({ isOpen, onClose }) =
         e.preventDefault();
         setFormError(null);
         try {
-            const payload = { ...form, alojamento: selectedAlojamento };
-            const res = await fetch('http://127.0.0.1:8000/api/funcionarios/', {
+            const payload = { ...form, alojamento: selectedAlojamento, obra: selectedObra };
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}api/funcionarios/cadastrar/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
                 setShowSuccess(true);
+                if (onSuccess) {
+                    onSuccess();
+                }
             } else {
                 const errorData = await res.json();
                 let errorMsg = 'Erro ao cadastrar funcionário.';
@@ -90,18 +113,42 @@ const ModalCadastrarFuncionarios: React.FC<ModalProps> = ({ isOpen, onClose }) =
                             <TextInput label="CPF" name="cpf" value={form.cpf} onChange={handleChange} className="w-full" placeholder="CPF" />
                         </div>
                         <div className="mb-3 flex gap-2 items-end">
-                            <label className="block text-white text-sm font-medium mb-1">Alojamento</label>
-                            <select
-                                className="flex-1 rounded border bg-white border-gray-300 px-2 py-2 text-black"
-                                value={selectedAlojamento}
-                                onChange={e => setSelectedAlojamento(e.target.value)}
-                                required
+                            <div className="flex-1">
+                                <label className="block text-white text-sm font-medium mb-1">Obra</label>
+                                <select
+                                    className="flex-1 w-full rounded border bg-white border-gray-300 px-2 py-2 text-black"
+                                    value={selectedObra}
+                                    onChange={e => setSelectedObra(e.target.value)}
+                                    required
+                                >
+                                    <option value="">Selecione uma obra</option>
+                                    {obras.map((o: any) => (
+                                        <option key={o.id} value={o.id}>{o.nome}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <PrimaryButton
+                                className="ml-2 px-2 py-1 rounded"
+                                onClick={() => { window.location.href = '/obras'; }}
                             >
-                                <option value="">Selecione um alojamento</option>
-                                {alojamentos.map((a: any) => (
-                                    <option key={a.id} value={a.id}>{a.nome}</option>
-                                ))}
-                            </select>
+                                Nova Obra
+                            </PrimaryButton>
+                        </div>
+                        <div className="mb-3 flex gap-2 items-end">
+                            <div className="flex-1">
+                                <label className="block text-white text-sm font-medium mb-1">Alojamento</label>
+                                <select
+                                    className="flex-1 w-full rounded border bg-white border-gray-300 px-2 py-2 text-black"
+                                    value={selectedAlojamento}
+                                    onChange={e => setSelectedAlojamento(e.target.value)}
+                                    required
+                                >
+                                    <option value="">Selecione um alojamento</option>
+                                    {alojamentos.map((a: any) => (
+                                        <option key={a.id} value={a.id}>{a.nome}</option>
+                                    ))}
+                                </select>
+                            </div>
                             <PrimaryButton
                                 className="ml-2 px-2 py-1 rounded"
                                 onClick={() => { window.location.href = '/alojamentos'; }}
@@ -110,7 +157,7 @@ const ModalCadastrarFuncionarios: React.FC<ModalProps> = ({ isOpen, onClose }) =
                             </PrimaryButton>
                         </div>
                         <div className="flex flex-row gap-2 border-box">
-                            <PrimaryButton className="mt-2 mx-auto relative">
+                            <PrimaryButton type="submit" className="mt-2 mx-auto relative">
                                 Cadastrar Funcionário
                             </PrimaryButton>
                             <CancelButton className="mt-2 mx-auto relative" onClick={onClose}>

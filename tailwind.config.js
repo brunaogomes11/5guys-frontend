@@ -6,11 +6,11 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                bluePrimary: "var(--blue-primary)", // Variável CSS personalizada
-                orangeButton: "var(--orange-button)",
-                whiteInput: "var(--white-input)",
-                redCancel: "var(--red-cancel)",
-                greenSuccess: "var(--green-success)",
+                "blue-primary": "var(--blue-primary)",
+                "orange-button": "var(--orange-button)", 
+                "white-input": "var(--white-input)",
+                "red-cancel": "var(--red-cancel)",
+                "green-success": "var(--green-success)",
             },
         },
     },

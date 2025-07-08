@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import Loading from '@/components/loading';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,11 +44,40 @@ export default function RootLayout({
 }
 
 function AuthGate({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
-  if (typeof window !== 'undefined' && !user && window.location.pathname !== '/login' && window.location.pathname !== '/cadastrar') {
-    window.location.href = '/login';
-    return null;
+  const [currentPath, setCurrentPath] = useState('');
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    setCurrentPath(window.location.pathname);
+  }, []);
+
+  useEffect(() => {
+    if (isClient && !loading) {
+      const currentPathname = window.location.pathname;
+      
+      // Se usuário está logado e está na página de login, redireciona para home
+      if (user && (currentPathname === '/login' || currentPathname === '/cadastrar')) {
+        router.push('/');
+      }
+      // Se usuário não está logado e não está nas páginas públicas, redireciona para login
+      else if (!user && currentPathname !== '/login' && currentPathname !== '/cadastrar') {
+        router.push('/login');
+      }
+    }
+  }, [user, loading, router, isClient]);
+
+  // Enquanto estiver carregando ou não for cliente, mostre um loader
+  if (loading || !isClient) {
+    return <Loading />;
   }
-  return <>{children}</>;
+
+  // Se o usuário não estiver logado e estiver na página de login/cadastro, ou se estiver logado, mostre o conteúdo
+  if ((!user && (currentPath === '/login' || currentPath === '/cadastrar')) || user) {
+    return <>{children}</>;
+  }
+
+  return null; // Evita renderizar o conteúdo antes do redirecionamento
 }

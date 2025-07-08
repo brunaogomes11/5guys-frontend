@@ -20,27 +20,59 @@ const ModalSelecaoEnd: React.FC<ModalSelecaoEndProps> = ({ isOpen, onClose, onSe
     setLoading(true);
     setError("");
     try {
-      // Busca o endereço reverso via Nominatim (OpenStreetMap)
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+      // Busca o endereço reverso via Nominatim (OpenStreetMap) com mais detalhes
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&addressdetails=1&zoom=18`);
       const data = await res.json();
-      const cep = data.address?.postcode;
-      let logradouro = data.address?.road || "";
-      let cidade = data.address?.city || data.address?.town || data.address?.village || "";
-      let uf = data.address?.state || "";
+      
+      // Extrai informações mais precisas do endereço
+      const address = data.address || {};
+      let cep = address.postcode || "";
+      let logradouro = address.road || address.pedestrian || address.path || "";
+      let numero = address.house_number || "";
+      let cidade = address.city || address.town || address.village || address.municipality || "";
+      let uf = address.state || "";
 
-      // Busca detalhes do CEP via ViaCEP
-      let viaCepData = null;
-      if (cep) {
-        const viaCepRes = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        viaCepData = await viaCepRes.json();
-        // Se ViaCEP retornar dados, sobrescreve logradouro, cidade e uf se disponíveis
-        if (!viaCepData.erro) {
-          if (viaCepData.logradouro) logradouro = viaCepData.logradouro;
-          if (viaCepData.localidade) cidade = viaCepData.localidade;
-          if (viaCepData.uf) uf = viaCepData.uf;
+      // Se encontrou CEP, valida e busca detalhes via ViaCEP
+      if (cep && cep.length === 8) {
+        try {
+          const viaCepRes = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+          const viaCepData = await viaCepRes.json();
+          
+          if (!viaCepData.erro) {
+            // Prioriza dados do ViaCEP para maior precisão
+            logradouro = viaCepData.logradouro || logradouro;
+            cidade = viaCepData.localidade || cidade;
+            uf = viaCepData.uf || uf;
+            cep = viaCepData.cep || cep;
+          }
+        } catch (viaCepError) {
+          console.log('Erro no ViaCEP, usando dados do Nominatim');
         }
       }
-      onSelect(lat, lng, cep, logradouro, cidade, uf);
+
+      // Se não encontrou CEP válido, tenta buscar por proximidade
+      if (!cep || cep.length !== 8) {
+        try {
+          // Busca CEPs próximos usando uma área um pouco maior
+          const proximityRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&lat=${lat}&lon=${lng}&addressdetails=1&limit=5&zoom=16`);
+          const proximityData = await proximityRes.json();
+          
+          for (const result of proximityData) {
+            const proxCep = result.address?.postcode;
+            if (proxCep && proxCep.length === 8) {
+              cep = proxCep;
+              break;
+            }
+          }
+        } catch (proximityError) {
+          console.log('Erro na busca por proximidade');
+        }
+      }
+
+      // Monta endereço completo
+      const enderecoCompleto = `${logradouro}${numero ? ', ' + numero : ''}`;
+      
+      onSelect(lat, lng, cep, enderecoCompleto, cidade, uf);
       onClose();
     } catch (e) {
       setError("Erro ao buscar endereço. Tente novamente.");
@@ -54,9 +86,14 @@ const ModalSelecaoEnd: React.FC<ModalSelecaoEndProps> = ({ isOpen, onClose, onSe
 
   return (
     <div className="fixed top-0 left-0 w-screen h-screen bg-[#000000AA] flex items-center justify-center z-[1100]">
-      <div className="bg-white rounded-lg shadow-lg p-6 min-w-[350px] min-h-[400px] relative flex flex-col">
+      <div className="bg-white rounded-lg shadow-lg p-6 min-w-[50vw] min-h-[400px] relative flex flex-col">
         <h2 className="text-blue-primary mb-2 text-center">Selecione no mapa</h2>
-        <div className="flex-1 min-h-[300px] w-[400px] h-[300px] mb-4">
+        <p className="text-xs text-gray-600 mb-3 text-center">
+          📍 Clique no mapa para selecionar um endereço.
+          <br />
+          💡 <strong>Dica:</strong> Para maior precisão, use o CEP no formulário principal!
+        </p>
+        <div className="flex-1 min-h-[300px] w-[100%] h-[300px] mb-4">
           <MapWithNoSSR onSelect={setSelected} />
         </div>
         {selected && (

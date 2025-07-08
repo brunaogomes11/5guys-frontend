@@ -7,14 +7,23 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import DeleteButton from "@/components/buttons/delete_button";
+import ModalConfirmacaoExclusao from "@/components/modals/confirmacao_exclusao";
 
-export function TabelaVeiculos() {
+interface TabelaVeiculosProps {
+    refreshTrigger?: number;
+}
+
+export function TabelaVeiculos({ refreshTrigger }: TabelaVeiculosProps) {
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
     const [filter, setFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const itemsPerPage = 10;
 
     const columns = [
@@ -25,11 +34,12 @@ export function TabelaVeiculos() {
         { key: 'actions', label: 'Ações', className: 'w-[100px] text-white text-center' },
     ];
 
+    
     useEffect(() => {
         async function fetchData() {
             setLoading(true);
             try {
-                const res = await fetch('http://127.0.0.1:8000/api/veiculos/', {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}api/veiculos/`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 });
                 if (res.ok) {
@@ -45,7 +55,38 @@ export function TabelaVeiculos() {
             setLoading(false);
         }
         fetchData();
-    }, []);
+    }, [refreshTrigger]);
+
+    // Função para excluir veículo
+    const handleDelete = async () => {
+        if (!selectedItem) return;
+        
+        setIsDeleting(true);
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}api/veiculos/${selectedItem.id}/`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            });
+            
+            if (res.ok) {
+                setData(prevData => prevData.filter(item => item.id !== selectedItem.id));
+                setShowDeleteModal(false);
+                setSelectedItem(null);
+            } else {
+                alert('Erro ao excluir veículo');
+            }
+        } catch (error) {
+            console.error('Erro ao excluir:', error);
+            alert('Erro ao excluir veículo');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const openDeleteModal = (item: any) => {
+        setSelectedItem(item);
+        setShowDeleteModal(true);
+    };
 
     function sortData(data: any[]) {
         if (!sortConfig) return data;
@@ -121,7 +162,9 @@ export function TabelaVeiculos() {
                             <TableCell>{item.modelo}</TableCell>
                             <TableCell>{item.cor}</TableCell>
                             <TableCell>{item.quantidade_passageiros}</TableCell>
-                            <TableCell className="text-center">{/* ações */}</TableCell>
+                            <TableCell className="text-center">
+                                <DeleteButton onClick={() => openDeleteModal(item)} />
+                            </TableCell>
                         </TableRow>
                     ))}
                     {paginated.length === 0 && (
@@ -150,6 +193,20 @@ export function TabelaVeiculos() {
                     Próxima
                 </button>
             </div>
+            
+            {/* Modal de confirmação de exclusão */}
+            <ModalConfirmacaoExclusao
+                isOpen={showDeleteModal}
+                onClose={() => {
+                    setShowDeleteModal(false);
+                    setSelectedItem(null);
+                }}
+                onConfirm={handleDelete}
+                titulo="Excluir Veículo"
+                mensagem="Tem certeza que deseja excluir o veículo"
+                nomeItem={selectedItem?.modelo || ""}
+                isDeleting={isDeleting}
+            />
         </div>
     );
 }

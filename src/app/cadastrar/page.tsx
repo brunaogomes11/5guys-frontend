@@ -48,7 +48,7 @@ const CadastroPage: React.FC = () => {
         e.preventDefault();
         if (validate()) {
             try {
-                const res = await fetch('http://127.0.0.1:8000/api/usuarios/cadastrar/', {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}api/usuarios/cadastrar/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -95,6 +95,12 @@ const CadastroPage: React.FC = () => {
                     Cadastrar
                 </button>
             </form>
+            <p className="text-white text-sm mt-4">
+                Já possui uma conta?{' '}
+                <a href="/login" className="text-[#ff6530] hover:underline">
+                    Faça login
+                </a>
+            </p>
         </div>
     );
 
