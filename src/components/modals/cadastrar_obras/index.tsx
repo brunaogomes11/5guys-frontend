@@ -9,9 +9,11 @@ interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess?: () => void;
+    isEdit?: boolean;
+    obra?: any;
 }
 
-const ModalCadastrarObra: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const ModalCadastrarObra: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess, isEdit = false, obra }) => {
     const [form, setForm] = useState({
         nome: "",
         endereco: "",
@@ -37,6 +39,24 @@ const ModalCadastrarObra: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess }
             }
         };
     }, []);
+
+    // Preenche o formulário quando estiver editando
+    useEffect(() => {
+        if (isEdit && obra) {
+            setForm({
+                nome: obra.nome || "",
+                endereco: obra.endereco || "",
+                numero: obra.numero || "",
+                cidade: obra.cidade || "",
+                estado: obra.estado || "",
+                cep: obra.cep || "",
+                latitude: obra.latitude?.toString() || "",
+                longitude: obra.longitude?.toString() || "",
+            });
+        } else if (!isEdit) {
+            resetForm();
+        }
+    }, [isEdit, obra, isOpen]);
 
     const resetForm = () => {
         setForm({
@@ -212,31 +232,59 @@ const ModalCadastrarObra: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess }
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setFormError(null);
+
+        // Validação de campos obrigatórios
+        if (!form.nome.trim()) {
+            setFormError('Nome é obrigatório.');
+            return;
+        }
+        if (!form.endereco.trim()) {
+            setFormError('Endereço é obrigatório.');
+            return;
+        }
+        if (!form.cidade.trim()) {
+            setFormError('Cidade é obrigatória.');
+            return;
+        }
+        if (!form.estado.trim()) {
+            setFormError('Estado é obrigatório.');
+            return;
+        }
+
         try {
             const payload = {
                 nome: form.nome,
                 endereco: form.endereco,
-                numero: form.numero,
+                numero: form.numero || "",
                 cidade: form.cidade,
                 estado: form.estado,
-                latitude: form.latitude ? Number(form.latitude).toFixed(4) : undefined,
-                longitude: form.longitude ? Number(form.longitude).toFixed(4)  : undefined,
-                cep: form.cep,
+                latitude: form.latitude ? Number(form.latitude).toFixed(4) : "0",
+                longitude: form.longitude ? Number(form.longitude).toFixed(4) : "0",
+                cep: form.cep || "",
             };
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}api/obras/cadastrar/`, {
-                method: 'POST',
+
+            const url = isEdit 
+                ? `${process.env.NEXT_PUBLIC_BACKEND_URL}api/obras/${obra.id}/`
+                : `${process.env.NEXT_PUBLIC_BACKEND_URL}api/obras/cadastrar/`;
+            
+            const method = isEdit ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method: method,
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
                 setShowSuccess(true);
-                resetForm();
+                if (!isEdit) {
+                    resetForm();
+                }
                 if (onSuccess) {
                     onSuccess();
                 }
             } else {
                 const errorData = await res.json();
-                let errorMsg = 'Erro ao cadastrar obra.';
+                let errorMsg = isEdit ? 'Erro ao editar obra.' : 'Erro ao cadastrar obra.';
                 if (typeof errorData === 'object' && errorData !== null) {
                     errorMsg = Object.entries(errorData)
                         .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
@@ -271,9 +319,11 @@ const ModalCadastrarObra: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess }
                     }}
                 />
             )}
-            <div className="fixed top-0 left-0 w-screen h-screen bg-[#000000AA] flex items-center justify-center z-[9999]">
+            <div className="fixed top-0 left-0 w-screen h-screen bg-[#000000AA] flex items-center justify-center z-[999]">
                 <div className="bg-blue-primary py-[3.25rem] px-[5.5rem] rounded-lg min-w-[350px] shadow-lg relative">
-                    <h2 className="text-[#FFFFFF] mb-4 text-center">Cadastrar Obra</h2>
+                    <h2 className="text-[#FFFFFF] mb-4 text-center">
+                        {isEdit ? 'Editar Obra' : 'Cadastrar Obra'}
+                    </h2>
                     <form onSubmit={handleSubmit}>
                         {formError && (
                             <div className="mb-3 text-red-600 bg-red-100 border border-red-300 rounded p-2 text-sm">
@@ -287,6 +337,7 @@ const ModalCadastrarObra: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess }
                                 value={form.nome}
                                 onChange={handleChange}
                                 className="w-full"
+                                required
                             />
                         </div>
                         <div className="mb-3 flex gap-2 items-end">
@@ -297,6 +348,7 @@ const ModalCadastrarObra: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess }
                                 onChange={handleAddressChange}
                                 className="flex-1"
                                 placeholder="Rua, Avenida..."
+                                required
                             />
                             <TextInput
                                 label="Nº"
@@ -323,6 +375,7 @@ const ModalCadastrarObra: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess }
                                 value={form.cidade}
                                 onChange={handleAddressChange}
                                 className="flex-1"
+                                required
                             />
                             <TextInput
                                 label="UF"
@@ -332,6 +385,7 @@ const ModalCadastrarObra: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess }
                                 className="w-1/3"
                                 maxLength={2}
                                 placeholder="UF"
+                                required
                             />
                         </div>
                         <div className="mb-3">
@@ -370,7 +424,7 @@ const ModalCadastrarObra: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess }
                         <div className="flex flex-row gap-2 border-box">
                             <PrimaryButton type="submit" className="mt-2 mx-auto relative">
                                 <img src="icons/tool_icon.svg" alt="Tool Icon" className="w-[1rem] absolute right-3 top-1/2 -translate-y-1/2"/>
-                                Cadastrar Obra
+                                {isEdit ? 'Salvar Alterações' : 'Cadastrar Obra'}
                             </PrimaryButton>
                             <CancelButton
                                 className="mt-2 mx-auto relative"

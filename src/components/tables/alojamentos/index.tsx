@@ -8,7 +8,9 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import DeleteButton from "@/components/buttons/delete_button";
+import EditButton from "@/components/buttons/edit_button";
 import ModalConfirmacaoExclusao from "@/components/modals/confirmacao_exclusao";
+import ModalCadastrarAlojamento from "@/components/modals/cadastrar_alojamentos";
 
 
 interface TabelaAlojamentosProps {
@@ -23,6 +25,7 @@ export function TabelaAlojamentos({ refreshTrigger }: TabelaAlojamentosProps) {
     const [filter, setFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const itemsPerPage = 10;
@@ -31,7 +34,6 @@ export function TabelaAlojamentos({ refreshTrigger }: TabelaAlojamentosProps) {
         { key: 'invoice', label: 'Nome', className: 'w-[200px] text-white' },
         { key: 'endereco', label: 'Endereço', className: 'w-[300px] text-white' },
         { key: 'cidade', label: 'Cidade/UF', className: 'w-[200px] text-white' },
-        { key: 'qntdFuncionarios', label: 'Qtd. Funcionários Alocados', className: 'w-[180px] text-white text-center' },
         { key: 'actions', label: 'Ações', className: 'w-[100px] text-white text-center' },
     ];
 
@@ -88,6 +90,18 @@ export function TabelaAlojamentos({ refreshTrigger }: TabelaAlojamentosProps) {
     const openDeleteModal = (item: any) => {
         setSelectedItem(item);
         setShowDeleteModal(true);
+    };
+
+    const openEditModal = (item: any) => {
+        setSelectedItem(item);
+        setShowEditModal(true);
+    };
+
+    const handleEditSuccess = () => {
+        setShowEditModal(false);
+        setSelectedItem(null);
+        // Trigger refresh usando o mesmo padrão do refreshTrigger
+        window.location.reload();
     };
 
     function sortData(data: any[]) {
@@ -164,9 +178,11 @@ export function TabelaAlojamentos({ refreshTrigger }: TabelaAlojamentosProps) {
                             <TableCell className="font-medium">{invoice.nome}</TableCell>
                             <TableCell>{invoice.endereco}</TableCell>
                             <TableCell>{invoice.cidade}</TableCell>
-                            <TableCell className="text-center">{invoice.qntdFuncionarios}</TableCell>
                             <TableCell className="text-center">
-                                <DeleteButton onClick={() => openDeleteModal(invoice)} />
+                                <div className="flex gap-2 justify-center">
+                                    <EditButton onClick={() => openEditModal(invoice)} />
+                                    <DeleteButton onClick={() => openDeleteModal(invoice)} />
+                                </div>
                             </TableCell>
                         </TableRow>
                     ))}
@@ -211,6 +227,20 @@ export function TabelaAlojamentos({ refreshTrigger }: TabelaAlojamentosProps) {
                 nomeItem={selectedItem?.nome || ""}
                 isDeleting={isDeleting}
             />
+
+            {/* Modal de edição */}
+            {showEditModal && selectedItem && (
+                <ModalCadastrarAlojamento
+                    isOpen={showEditModal}
+                    onClose={() => {
+                        setShowEditModal(false);
+                        setSelectedItem(null);
+                    }}
+                    onSuccess={handleEditSuccess}
+                    isEdit={true}
+                    alojamento={selectedItem}
+                />
+            )}
         </div>
     );
 }

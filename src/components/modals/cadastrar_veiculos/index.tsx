@@ -9,9 +9,11 @@ interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess?: () => void;
+    isEdit?: boolean;
+    veiculo?: any;
 }
 
-const ModalCadastrarVeiculos: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const ModalCadastrarVeiculos: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess, isEdit = false, veiculo }) => {
     const [form, setForm] = useState({
         quantidade_passageiros: "",
         modelo: "",
@@ -328,9 +330,9 @@ const ModalCadastrarVeiculos: React.FC<ModalProps> = ({ isOpen, onClose, onSucce
                     }}
                 />
             )}
-            <div className="fixed top-0 left-0 w-screen h-screen bg-[#000000AA] flex items-center justify-center z-[9999]">
+            <div className="fixed top-0 left-0 w-screen h-screen bg-[#000000AA] flex items-center justify-center z-[999]">
                 <div className="bg-blue-primary py-[3.25rem] px-[5.5rem] rounded-lg min-w-[350px] shadow-lg relative">
-                    <h2 className="text-[#FFFFFF] mb-4 text-center">Cadastrar Veículo</h2>
+                    <h2 className="text-[#FFFFFF] mb-4 text-center">{isEdit ? 'Editar Veículo' : 'Cadastrar Veículo'}</h2>
                     <form onSubmit={handleSubmit}>
                         {formError && (
                             <div className="mb-3 text-red-600 bg-red-100 border border-red-300 rounded p-2 text-sm">

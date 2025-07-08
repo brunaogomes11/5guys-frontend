@@ -9,9 +9,11 @@ interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess?: () => void; // Callback para atualizar a tabela
+    isEdit?: boolean;
+    alojamento?: any;
 }
 
-const ModalCadastrarAlojamento: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const ModalCadastrarAlojamento: React.FC<ModalProps> = ({ isOpen, onClose, onSuccess, isEdit = false, alojamento }) => {
     const [form, setForm] = useState({
         nome: "",
         endereco: "",
@@ -40,7 +42,41 @@ const ModalCadastrarAlojamento: React.FC<ModalProps> = ({ isOpen, onClose, onSuc
         };
     }, []);
 
-    
+    // Preenche o formulário quando estiver editando
+    useEffect(() => {
+        if (isEdit && alojamento) {
+            setForm({
+                nome: alojamento.nome || "",
+                endereco: alojamento.endereco || "",
+                numero: alojamento.numero || "",
+                cidade: alojamento.cidade || "",
+                estado: alojamento.estado || "",
+                quantidade_de_vagas: alojamento.quantidade_de_vagas?.toString() || "",
+                cep: alojamento.cep || "",
+                latitude: alojamento.latitude?.toString() || "",
+                longitude: alojamento.longitude?.toString() || "",
+            });
+        } else if (!isEdit) {
+            resetForm();
+        }
+    }, [isEdit, alojamento, isOpen]);
+
+    const resetForm = () => {
+        setForm({
+            nome: "",
+            endereco: "",
+            numero: "",
+            cidade: "",
+            estado: "",
+            quantidade_de_vagas: "",
+            cep: "",
+            latitude: "",
+            longitude: "",
+        });
+        setFormError(null);
+        setSearchStatus('');
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
@@ -228,23 +264,50 @@ const ModalCadastrarAlojamento: React.FC<ModalProps> = ({ isOpen, onClose, onSuc
         e.preventDefault();
         setShowFormError(true);
         setFormError(null);
+
+        // Validação de campos obrigatórios
+        if (!form.nome.trim()) {
+            setFormError('Nome é obrigatório.');
+            return;
+        }
+        if (!form.endereco.trim()) {
+            setFormError('Endereço é obrigatório.');
+            return;
+        }
+        if (!form.cidade.trim()) {
+            setFormError('Cidade é obrigatória.');
+            return;
+        }
+        if (!form.estado.trim()) {
+            setFormError('Estado é obrigatório.');
+            return;
+        }
+
         try {
             const payload = {
                 nome: form.nome,
                 endereco: form.endereco,
-                numero: form.numero,
+                numero: form.numero || "",
                 cidade: form.cidade,
                 estado: form.estado,
                 quantidade_de_vagas: form.quantidade_de_vagas ? Number(form.quantidade_de_vagas) : 1,
-                latitude: form.latitude ? Number(form.latitude).toFixed(6) : undefined,
-                longitude: form.longitude ? Number(form.longitude).toFixed(6) : undefined,
-                cep: form.cep,
+                latitude: form.latitude ? Number(form.latitude).toFixed(6) : "0",
+                longitude: form.longitude ? Number(form.longitude).toFixed(6) : "0",
+                cep: form.cep || "",
             };
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}api/alojamentos/cadastrar/`, {
-                method: 'POST',
+
+            const url = isEdit 
+                ? `${process.env.NEXT_PUBLIC_BACKEND_URL}api/alojamentos/${alojamento.id}/`
+                : `${process.env.NEXT_PUBLIC_BACKEND_URL}api/alojamentos/cadastrar/`;
+            
+            const method = isEdit ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method: method,
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
                 body: JSON.stringify(payload)
             });
+            
             if (res.ok) {
                 setShowSuccess(true);
                 // Chama callback para atualizar a tabela
@@ -252,22 +315,12 @@ const ModalCadastrarAlojamento: React.FC<ModalProps> = ({ isOpen, onClose, onSuc
                     onSuccess();
                 }
                 // Reset do formulário para próximo cadastro
-                setForm({
-                    nome: "",
-                    endereco: "",
-                    numero: "",
-                    cidade: "",
-                    estado: "",
-                    quantidade_de_vagas: "",
-                    cep: "",
-                    latitude: "",
-                    longitude: "",
-                });
-                setFormError(null);
-                setShowFormError(false);
+                if (!isEdit) {
+                    resetForm();
+                }
             } else {
                 const errorData = await res.json();
-                let errorMsg = 'Erro ao cadastrar alojamento.';
+                let errorMsg = isEdit ? 'Erro ao editar alojamento.' : 'Erro ao cadastrar alojamento.';
                 if (typeof errorData === 'object' && errorData !== null) {
                     errorMsg = Object.entries(errorData)
                         .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
@@ -302,9 +355,11 @@ const ModalCadastrarAlojamento: React.FC<ModalProps> = ({ isOpen, onClose, onSuc
                     }}
                 />
             )}
-            <div className="fixed top-0 left-0 w-screen h-screen bg-[#000000AA] flex items-center justify-center z-[9999]">
+            <div className="fixed top-0 left-0 w-screen h-screen bg-[#000000AA] flex items-center justify-center z-[999]">
                 <div className="bg-blue-primary py-[3.25rem] px-[5.5rem] rounded-lg min-w-[350px] shadow-lg relative">
-                    <h2 className="text-[#FFFFFF] mb-4 text-center">Cadastrar Alojamento</h2>
+                    <h2 className="text-[#FFFFFF] mb-4 text-center">
+                        {isEdit ? 'Editar Alojamento' : 'Cadastrar Alojamento'}
+                    </h2>
                     <form onSubmit={handleSubmit}>
                         {(formError && showFormError) && (
                             <div className="mb-3 text-red-600 bg-red-100 border border-red-300 rounded p-2 text-sm">
@@ -312,7 +367,7 @@ const ModalCadastrarAlojamento: React.FC<ModalProps> = ({ isOpen, onClose, onSuc
                             </div>
                         )}
                         <div className="mb-3">
-                            <TextInput label="Nome" name="nome" value={form.nome} onChange={handleChange} className="w-full" />
+                            <TextInput label="Nome" name="nome" value={form.nome} onChange={handleChange} className="w-full" required />
                         </div>
                         <div className="mb-3 flex gap-2 items-end">
                             <TextInput 
@@ -322,6 +377,7 @@ const ModalCadastrarAlojamento: React.FC<ModalProps> = ({ isOpen, onClose, onSuc
                                 onChange={handleAddressChange} 
                                 className="flex-1" 
                                 placeholder="Rua, Avenida..." 
+                                required
                             />
                             <TextInput 
                                 label="Nº" 
@@ -347,6 +403,7 @@ const ModalCadastrarAlojamento: React.FC<ModalProps> = ({ isOpen, onClose, onSuc
                                 value={form.cidade} 
                                 onChange={handleAddressChange} 
                                 className="flex-1" 
+                                required
                             />
                             <TextInput 
                                 label="UF" 
@@ -356,6 +413,7 @@ const ModalCadastrarAlojamento: React.FC<ModalProps> = ({ isOpen, onClose, onSuc
                                 className="w-1/3" 
                                 maxLength={2} 
                                 placeholder="UF" 
+                                required
                             />
                         </div>
                         <div className="mb-3">
@@ -412,7 +470,7 @@ const ModalCadastrarAlojamento: React.FC<ModalProps> = ({ isOpen, onClose, onSuc
                         </div>
                         <div className="flex flex-row gap-2 border-box">
                             <PrimaryButton type="submit" className="mt-2 mx-auto relative">
-                                Cadastrar Alojamento
+                                {isEdit ? 'Salvar Alterações' : 'Cadastrar Alojamento'}
                             </PrimaryButton>
                             <CancelButton className="mt-2 mx-auto relative" onClick={onClose}>
                                 Cancelar

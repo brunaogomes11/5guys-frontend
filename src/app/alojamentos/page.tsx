@@ -4,25 +4,29 @@ import Menu from "@/components/menu";
 import { useState } from "react";
 import ModalCadastrarAlojamento from "@/components/modals/cadastrar_alojamentos";
 import { TabelaAlojamentos } from "@/components/tables/alojamentos";
+import MapaAlojamentos from "@/components/maps/mapa_alojamentos/MapaAlojamentos";
 
 export default function AlojamentosPage() {
     const [showModal, setShowModal] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     const handleSuccess = () => {
-        setRefreshTrigger(prev => prev + 1); // Incrementa para trigger refresh
+        setShowModal(false);
+        setRefreshTrigger(prev => prev + 1);
     };
 
     return (
         <div>
             <Menu />
-            <div className="w-[100%] h-[100%] p-[32px] border-box flex flex-row gap-[32px] justify-start items-start">
-                <div className="w-[300px] flex justify-center items-center">
+            <div className="w-[100%] h-[100%] p-[32px] border-box flex flex-col gap-[24px]">
+                {/* Seção de cadastro */}
+                <div className="flex justify-center">
                     {showModal && (
                         <ModalCadastrarAlojamento 
                             isOpen={true} 
                             onClose={() => setShowModal(false)}
                             onSuccess={handleSuccess}
+                            isEdit={false}
                         />
                     )}
 
@@ -31,8 +35,20 @@ export default function AlojamentosPage() {
                         Cadastrar novos alojamentos
                     </PrimaryButton>
                 </div>
-                <div className="w-full">
-                    <TabelaAlojamentos refreshTrigger={refreshTrigger} />
+
+                {/* Seção principal com tabela e mapa */}
+                <div className="flex flex-col lg:flex-row gap-[24px] h-[calc(100vh-200px)]">
+                    {/* Tabela de alojamentos */}
+                    <div className="w-full lg:w-[50%] h-full overflow-auto">
+                        <TabelaAlojamentos refreshTrigger={refreshTrigger} />
+                    </div>
+
+                    {/* Mapa de alojamentos */}
+                    <div className="w-full lg:w-[50%] h-full">
+                        <div className="h-[calc(100%-40px)] border border-gray-200 rounded-lg overflow-hidden">
+                            <MapaAlojamentos refreshTrigger={refreshTrigger} />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

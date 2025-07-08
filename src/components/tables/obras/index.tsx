@@ -8,7 +8,9 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import DeleteButton from "@/components/buttons/delete_button";
+import EditButton from "@/components/buttons/edit_button";
 import ModalConfirmacaoExclusao from "@/components/modals/confirmacao_exclusao";
+import ModalCadastrarObra from "@/components/modals/cadastrar_obras";
 
 interface TabelaObrasProps {
     refreshTrigger?: number;
@@ -18,19 +20,19 @@ export function TabelaObras({ refreshTrigger }: TabelaObrasProps) {
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
     const [filter, setFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<any>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
     const itemsPerPage = 10;
 
     const columns = [
         { key: 'nome', label: 'Nome', className: 'w-[200px] text-white' },
         { key: 'endereco', label: 'Endereço', className: 'w-[300px] text-white' },
         { key: 'cidade', label: 'Cidade/UF', className: 'w-[200px] text-white' },
-        { key: 'qntdFuncionarios', label: 'Qtd. Funcionários Alocados', className: 'w-[180px] text-white text-center' },
         { key: 'actions', label: 'Ações', className: 'w-[100px] text-white text-center' },
     ];
 
@@ -86,6 +88,18 @@ export function TabelaObras({ refreshTrigger }: TabelaObrasProps) {
     const openDeleteModal = (item: any) => {
         setSelectedItem(item);
         setShowDeleteModal(true);
+    };
+
+    const openEditModal = (item: any) => {
+        setSelectedItem(item);
+        setShowEditModal(true);
+    };
+
+    const handleEditSuccess = () => {
+        setShowEditModal(false);
+        setSelectedItem(null);
+        // Trigger refresh
+        window.location.reload();
     };
 
     function sortData(data: any[]) {
@@ -161,9 +175,11 @@ export function TabelaObras({ refreshTrigger }: TabelaObrasProps) {
                             <TableCell className="font-medium">{item.nome}</TableCell>
                             <TableCell>{item.endereco}</TableCell>
                             <TableCell>{item.cidade}</TableCell>
-                            <TableCell className="text-center">{item.qntdFuncionarios}</TableCell>
                             <TableCell className="text-center">
-                                <DeleteButton onClick={() => openDeleteModal(item)} />
+                                <div className="flex gap-2 justify-center">
+                                    <EditButton onClick={() => openEditModal(item)} />
+                                    <DeleteButton onClick={() => openDeleteModal(item)} />
+                                </div>
                             </TableCell>
                         </TableRow>
                     ))}
@@ -207,6 +223,20 @@ export function TabelaObras({ refreshTrigger }: TabelaObrasProps) {
                 nomeItem={selectedItem?.nome || ""}
                 isDeleting={isDeleting}
             />
+
+            {/* Modal de edição */}
+            {showEditModal && selectedItem && (
+                <ModalCadastrarObra
+                    isOpen={showEditModal}
+                    onClose={() => {
+                        setShowEditModal(false);
+                        setSelectedItem(null);
+                    }}
+                    onSuccess={handleEditSuccess}
+                    isEdit={true}
+                    obra={selectedItem}
+                />
+            )}
         </div>
     );
 }

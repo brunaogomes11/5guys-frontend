@@ -26,6 +26,7 @@ export default function ObrasPage() {
                             isOpen={true} 
                             onClose={() => setShowModal(false)}
                             onSuccess={handleSuccess}
+                            isEdit={false}
                         />
                     )}
 
@@ -39,13 +40,11 @@ export default function ObrasPage() {
                 <div className="flex flex-col lg:flex-row gap-[24px] h-[calc(100vh-200px)]">
                     {/* Tabela de obras */}
                     <div className="w-full lg:w-[50%] h-full overflow-auto">
-                        <h2 className="text-xl font-semibold mb-4 text-gray-800">Lista de Obras</h2>
                         <TabelaObras refreshTrigger={refreshTrigger} />
                     </div>
 
                     {/* Mapa de obras */}
                     <div className="w-full lg:w-[50%] h-full">
-                        <h2 className="text-xl font-semibold mb-4 text-gray-800">Localização das Obras</h2>
                         <div className="h-[calc(100%-40px)] border border-gray-200 rounded-lg overflow-hidden">
                             <MapaObras refreshTrigger={refreshTrigger} />
                         </div>
